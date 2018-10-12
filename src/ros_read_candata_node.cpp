@@ -1,8 +1,15 @@
 #include <ros/ros.h>
 #include <can_msgs/Frame.h>
+#include <geometry_msgs/TwistStamped.h>
+#include <math.h>
 
 #define MPH2KMH 1.60934
 #define KIA_SOUL_STEERING_RATIO 15.7
+#define PI 3.14159265
+
+double yaw_angle = 0.0;
+double average_speed = 0.0;
+
 void msgCallback(const can_msgs::Frame::ConstPtr& msg){
     unsigned char byte0;
     unsigned char byte1;
@@ -24,7 +31,7 @@ void msgCallback(const can_msgs::Frame::ConstPtr& msg){
     double speed_LB;
     double speed_RB;
     double steering_wheel_angle;
-    double yaw_angle;
+
 
     if(msg->id == 688){
         //Get Raw steering wheel angle data from can_tx msg
@@ -62,13 +69,27 @@ void msgCallback(const can_msgs::Frame::ConstPtr& msg){
         //ROS_INFO("WHEELS SPEED DATA LF : %f km/h, RF : %f km/h, LB : %f km/h, RB : %f km/h",
         //         speed_LF, speed_RF, speed_LB, speed_RB);
         ROS_INFO("AVERAGE WHEEL SPEED DATA : %f km/h",(speed_LF + speed_RF + speed_LB + speed_RB)/4);
+        average_speed = (speed_LF + speed_RF + speed_LB + speed_RB)/4;
     }
 }
 
 int main(int argc, char **argv){
     ros::init(argc, argv, "can_data_reader");
     ros::NodeHandle nh;
+    ros::Publisher stamped_pub = nh.advertise<geometry_msgs::TwistStamped>("/TwistStamped", 100);
     ros::Subscriber ros_read_candata_sub = nh.subscribe("can_tx", 100, msgCallback);
-    ros::spin();
+    ros::Rate loop_rate(60);
+    ros::spinOnce();
+    while(ros::ok()){
+        geometry_msgs::TwistStamped vector_twist;
+        vector_twist.header.stamp = ros::Time::now();
+        vector_twist.twist.linear.x = cos(yaw_angle * PI / 180) * average_speed;
+        vector_twist.twist.linear.y = sin(yaw_angle * PI / 180) * average_speed;
+        vector_twist.twist.linear.z = 0.0;
+
+        stamped_pub.publish(vector_twist);
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     return 0;
 }

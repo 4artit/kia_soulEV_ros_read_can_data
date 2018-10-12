@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>ros_read_candata</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>The ros_read_candata package</description>
 
   <maintainer email="4artit@gmail.com">DongminKim</maintainer>
@@ -40,6 +40,7 @@
 
   <depend>message_generation</depend>
   <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
   <depend>roscpp</depend>
   <depend>can_msgs</depend>
 
