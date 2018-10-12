@@ -2,7 +2,7 @@
 #include <can_msgs/Frame.h>
 
 #define MPH2KMH 1.60934
-
+#define KIA_SOUL_STEERING_RATIO 15.7
 void msgCallback(const can_msgs::Frame::ConstPtr& msg){
     unsigned char byte0;
     unsigned char byte1;
@@ -24,6 +24,7 @@ void msgCallback(const can_msgs::Frame::ConstPtr& msg){
     double speed_LB;
     double speed_RB;
     double steering_wheel_angle;
+    double yaw_angle;
 
     if(msg->id == 688){
         //Get Raw steering wheel angle data from can_tx msg
@@ -32,7 +33,8 @@ void msgCallback(const can_msgs::Frame::ConstPtr& msg){
         raw_angle = byte1;
         raw_angle = (raw_angle << 8) + byte0;
         steering_wheel_angle = double(raw_angle) * 0.1;
-        ROS_INFO("STEERING WHEEL ANGLE DATA %f degree", steering_wheel_angle);
+        yaw_angle = steering_wheel_angle / KIA_SOUL_STEERING_RATIO;
+        ROS_INFO("YAW ANGLE DATA %f degree", yaw_angle);
     }
     if(msg->id == 1200){
         //Get Raw wheels speed data from can_tx msg
@@ -57,8 +59,9 @@ void msgCallback(const can_msgs::Frame::ConstPtr& msg){
         speed_RF = double(raw_speed_RF) * 0.02 * MPH2KMH;
         speed_LB = double(raw_speed_LB) * 0.02 * MPH2KMH;
         speed_RB = double(raw_speed_RB) * 0.02 * MPH2KMH;
-        ROS_INFO("WHEELS SPEED DATA LF : %f km/h, RF : %f km/h, LB : %f km/h, RB : %f km/h",
-                 speed_LF, speed_RF, speed_LB, speed_RB);
+        //ROS_INFO("WHEELS SPEED DATA LF : %f km/h, RF : %f km/h, LB : %f km/h, RB : %f km/h",
+        //         speed_LF, speed_RF, speed_LB, speed_RB);
+        ROS_INFO("AVERAGE WHEEL SPEED DATA : %f km/h",(speed_LF + speed_RF + speed_LB + speed_RB)/4);
     }
 }
 
