@@ -2,7 +2,7 @@
 
 ### Intro
 
-This is simple node for get steering wheel angle data and speed data from each 4 wheels.
+This is simple node for get steering wheel angle data and speed data from KIA SOUL EV's CAN data.
 
 ### Environment
 
@@ -10,13 +10,27 @@ This is simple node for get steering wheel angle data and speed data from each 4
 
 ### Dependency
 
-* kvaser_interface(you need kvaser CAN converter)
-* can_msgs(in ros_canopen)
-
-
+* kvaser_interface(https://github.com/astuff/kvaser_interface)
+* can_msgs(in ros_canopen https://github.com/ros-industrial/ros_canopen)
 
 ### How To Use
-First you have to change this ros directory name as 'ros_read_candata'.
-And then, use below command.
+
+Use below command.
 
 `rosrun ros_read_candata ros_read_candata_node`
+
+
+
+## The `ros_read_candata` Node
+
+#### TOPICS
+
+*/TwistStamped*
+
+This topic is published by the node. It contains 2d linear vector. You can get yaw angle and velocity using this 2d linear vector.
+
+
+
+*/can_tx* [can_msgs::Frame]
+
+This topic is subscribed to by the node. It expects to read CAN data from KIA SOUL EV.
