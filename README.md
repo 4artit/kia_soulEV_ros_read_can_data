@@ -6,7 +6,7 @@ This is simple node for get steering wheel angle data and speed data from KIA SO
 
 ### Environment
 
-* ROS Kinetic
+* ROS Kinetic / Melodic
 
 ### Dependency
 
