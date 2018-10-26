@@ -1,0 +1,4 @@
+<launch>
+     <node name="ros_read_candata_node"  pkg="ros_read_candata"  type="ros_read_candata_node">
+     </node>
+</launch>
