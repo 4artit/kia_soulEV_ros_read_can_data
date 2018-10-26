@@ -19,6 +19,10 @@ Use below command.
 
 `rosrun ros_read_candata ros_read_candata_node`
 
+or go to launch directory and use below command
+
+`roslaunch read_can_data.launch`
+
 
 
 ## The `ros_read_candata` Node
