@@ -3,7 +3,6 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <math.h>
 
-#define MPH2KMH 1.60934
 #define KIA_SOUL_STEERING_RATIO 15.7
 #define PI 3.14159265
 
@@ -25,13 +24,44 @@ void msgCallback(const can_msgs::Frame::ConstPtr& msg){
     short raw_speed_LB = 0;
     short raw_speed_RB = 0;
     short raw_angle = 0;
+    short raw_lat_accel = 0;
+    short raw_long_accel = 0;
+    short raw_cyl_pres = 0;
+    short raw_yaw_rate = 0;
 
     double speed_LF;
     double speed_RF;
     double speed_LB;
     double speed_RB;
     double steering_wheel_angle;
+    double lateral_accel;
+    double longitudinal_accel;
+    double cylinder_pressure;
+    double yaw_rate;
 
+    if(msg->id == 544){
+	    byte0 = msg->data[0];
+        byte1 = msg->data[1];
+        raw_lat_accel = byte1;
+        raw_lat_accel = (raw_lat_accel << 8) + byte0;
+        byte2 = msg->data[2];
+        byte3 = msg->data[3];
+        raw_long_accel = byte3;
+        raw_long_accel = (raw_long_accel << 8) + byte2;
+        byte4 = msg->data[4];
+        byte5 = msg->data[5];
+        raw_cyl_pres = byte5;
+        raw_cyl_pres = (raw_cyl_pres << 6) + (byte4 >> 2);
+        byte6 = msg->data[6];
+        byte7 = msg->data[7];
+        raw_yaw_rate = byte7;
+        raw_yaw_rate = (raw_yaw_rate << 8) + byte6;
+        lateral_accel = double(raw_lat_accel) * 0.01 - 10.23; // m/s^2
+        longitudinal_accel = double(raw_long_accel) * 0.01 - 10.23; // m/s^2
+        cylinder_pressure = double(raw_long_accel) * 0.1; // bar
+        yaw_rate = double(raw_yaw_rate) * 0.01 - 40.95; // rad/s
+        ROS_INFO("LAT ACC : %f m/s^2  LONG ACC : %f m/s^2  CYLINDER PRESSURE : %f bar  YAW RATE : %f rad/s", lateral_accel, longitudinal_accel, cylinder_pressure, yaw_rate);
+    }
 
     if(msg->id == 688){
         //Get Raw steering wheel angle data from can_tx msg
@@ -62,10 +92,10 @@ void msgCallback(const can_msgs::Frame::ConstPtr& msg){
         raw_speed_RB = byte7;
         raw_speed_RB = (raw_speed_RB << 8) + byte6;
         //Transform 'mph' to 'km/h'
-        speed_LF = double(raw_speed_LF) * 0.02 * MPH2KMH;
-        speed_RF = double(raw_speed_RF) * 0.02 * MPH2KMH;
-        speed_LB = double(raw_speed_LB) * 0.02 * MPH2KMH;
-        speed_RB = double(raw_speed_RB) * 0.02 * MPH2KMH;
+        speed_LF = double(raw_speed_LF) * 0.03125;
+        speed_RF = double(raw_speed_RF) * 0.03125;
+        speed_LB = double(raw_speed_LB) * 0.03125;
+        speed_RB = double(raw_speed_RB) * 0.03125;
         //ROS_INFO("WHEELS SPEED DATA LF : %f km/h, RF : %f km/h, LB : %f km/h, RB : %f km/h",
         //         speed_LF, speed_RF, speed_LB, speed_RB);
         ROS_INFO("AVERAGE WHEEL SPEED DATA : %f km/h",(speed_LF + speed_RF + speed_LB + speed_RB)/4);
